@@ -3,6 +3,7 @@ package com.example.plannerproject010;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,16 +28,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ArrayList<String> list=new ArrayList<>();
-        for(int i=0; i<10; i++)
-        {
-            list.add(String.format("Text %d",i));
-        }
 
         RecyclerView recyclerView=findViewById(R.id.planList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         SimpleAdapter adapter=new SimpleAdapter(list);
         recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(adapter));
+        helper.attachToRecyclerView(recyclerView);
 
         Button btn=(Button) findViewById(R.id.button);
         btn.setOnClickListener(new View.OnClickListener() {
