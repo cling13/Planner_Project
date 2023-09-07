@@ -43,20 +43,6 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                AlertDialog.Builder dlg=new AlertDialog.Builder(MainActivity.this);
-                View v=(View) View.inflate(MainActivity.this,R.layout.plantextbox,null);
-                dlg.setView(v);
-                dlg.setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        EditText et=(EditText) v.findViewById(R.id.placetext);
-                        list.add(et.getText().toString());
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-                dlg.show();
-                */
 
                 Intent intent=new Intent(getApplicationContext(),SearchActivity.class);
                 startActivity(intent);

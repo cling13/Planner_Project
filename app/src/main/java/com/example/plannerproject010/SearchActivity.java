@@ -41,6 +41,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
     Button searchBtn;
     EditText sText;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +53,11 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         RecyclerView recyclerSearchView=findViewById(R.id.searchList);
         recyclerSearchView.setLayoutManager(new LinearLayoutManager(this));
 
-        SimpleAdapter searchadapter=new SimpleAdapter(searchList);
-        recyclerSearchView.setAdapter(searchadapter);
 
-        ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(searchadapter));
+        SimpleAdapter searchAdapter=new SimpleAdapter(searchList);
+        recyclerSearchView.setAdapter(searchAdapter);
+
+        ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(searchAdapter));
         helper.attachToRecyclerView(recyclerSearchView);
 
         searchBtn=(Button) findViewById(R.id.SearchBtn);
@@ -116,11 +119,15 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                         Place place=fetchPlaceResponse.getPlace();
                                         LatLng locationLatLng = place.getLatLng();
 
+                                        if (placeName != null) {
+                                            Toast.makeText(getApplicationContext(), placeName, Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "장소 이름이 없습니다.", Toast.LENGTH_SHORT).show();
+                                        }
                                         //검색 결과 지도에 표시
                                         mMap.clear(); // 기존 마커 지우기
                                         mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
-                                        Toast.makeText(getApplicationContext(), "장소를 가져왔습니다.", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "장소를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
                                     }
