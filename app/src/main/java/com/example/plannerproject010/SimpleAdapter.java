@@ -44,11 +44,13 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        String text = data.get(position);
+        holder.place.setText(text);
     }
 
     @Override
     public int getItemCount() {
 
-        return 0;
+        return data.size();
     }
 }
