@@ -66,6 +66,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 searchLocation();
             }
         });
@@ -82,7 +83,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void searchLocation() {
-        String locationName = sText.getTransitionName().toString();
+        String locationName = sText.getText().toString();
 
         //place 검색 요청 생성
         Places.initialize(getApplicationContext(),"AIzaSyABN87oljSBD55FAbT9AgnYEGcDBFXuVCg");
@@ -99,6 +100,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         placesClient.findAutocompletePredictions(request).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
             @Override
             public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
+
                 if(task.isSuccessful()){
                     FindAutocompletePredictionsResponse response = task.getResult();
                     if(response!=null){
@@ -118,6 +120,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                         mMap.clear(); // 기존 마커 지우기
                                         mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
+                                        Toast.makeText(getApplicationContext(), "장소를 가져왔습니다.", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "장소를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
                                     }
