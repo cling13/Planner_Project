@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*
                 AlertDialog.Builder dlg=new AlertDialog.Builder(MainActivity.this);
                 View v=(View) View.inflate(MainActivity.this,R.layout.plantextbox,null);
                 dlg.setView(v);
@@ -54,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 dlg.show();
+                */
+
+                Intent intent=new Intent(getApplicationContext(),SearchActivity.class);
+                startActivity(intent);
             }
         });
     }

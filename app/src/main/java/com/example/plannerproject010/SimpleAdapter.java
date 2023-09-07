@@ -50,10 +50,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view;
         Context context=parent.getContext();
         LayoutInflater inflater=(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View view=inflater.inflate(R.layout.itemlayout,parent,false);
+        view = inflater.inflate(R.layout.itemlayout, parent, false);
         SimpleAdapter.ViewHolder vh=new SimpleAdapter.ViewHolder(view);
 
         return vh;
