@@ -11,7 +11,9 @@
         android:id="@+id/planList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
 
     <Button
         android:id="@+id/button"
