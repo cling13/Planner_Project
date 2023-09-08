@@ -10,16 +10,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder> implements ItemTouchHelperListner {
 
-    private ArrayList<String> data = null;
+    private ArrayList<listClass> data = null;
 
     @Override
     public boolean onItemMove(int from_position, int to_position) {
-        String tmp = data.get(from_position);
+        listClass tmp = data.get(from_position);
         data.remove(from_position);
         data.add(to_position, tmp);
 
@@ -34,16 +32,18 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView place;
+        TextView nameText;
+        TextView addressText;
 
         ViewHolder(View itemView) {
             super(itemView);
 
-            place = itemView.findViewById(R.id.place);
+            addressText=itemView.findViewById(R.id.placeAddress);
+            nameText = itemView.findViewById(R.id.placeName);
         }
     }
 
-    SimpleAdapter(ArrayList<String>list){
+    SimpleAdapter(ArrayList<listClass>list){
         data=list;
     }
 
@@ -63,8 +63,9 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        String text = data.get(position);
-        holder.place.setText(text);
+        listClass text = data.get(position);
+        holder.nameText.setText(text.getName());
+        holder.addressText.setText(text.getAddress());
     }
 
     @Override
@@ -73,3 +74,4 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         return data.size();
     }
 }
+

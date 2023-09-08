@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +35,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SearchActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -41,20 +43,20 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
     Button searchBtn;
     EditText sText;
 
-
+    ArrayList<listClass> searchList;
+    SimpleAdapter searchAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        ArrayList<String> searchList=new ArrayList<>();
+        searchList=new ArrayList<>();
 
         RecyclerView recyclerSearchView=findViewById(R.id.searchList);
         recyclerSearchView.setLayoutManager(new LinearLayoutManager(this));
 
-
-        SimpleAdapter searchAdapter=new SimpleAdapter(searchList);
+        searchAdapter=new SimpleAdapter(searchList);
         recyclerSearchView.setAdapter(searchAdapter);
 
         ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(searchAdapter));
@@ -103,36 +105,38 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         placesClient.findAutocompletePredictions(request).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
             @Override
             public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
+                List<AutocompletePrediction> predictionList=new ArrayList<>();
 
                 if(task.isSuccessful()){
                     FindAutocompletePredictionsResponse response = task.getResult();
                     if(response!=null){
                         for(AutocompletePrediction prediction : response.getAutocompletePredictions()){
+                            predictionList.add(prediction);
+
                             String placeId = prediction.getPlaceId();
-                            String placeName = prediction.getFullText(null).toString();
+                            String placeAddress = prediction.getFullText(null).toString();
+                            String placeName =prediction.getPrimaryText(null).toString();
 
-                            placesClient.fetchPlace(FetchPlaceRequest.builder(placeId, Arrays.asList(Place.Field.LAT_LNG)).build()).addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
-                                @Override
-                                public void onComplete(@NonNull Task<FetchPlaceResponse> task) {
-                                    if(task.isSuccessful()){
-                                        FetchPlaceResponse fetchPlaceResponse=task.getResult();
-                                        Place place=fetchPlaceResponse.getPlace();
-                                        LatLng locationLatLng = place.getLatLng();
+                            searchAdapter.notifyDataSetChanged();
 
-                                        if (placeName != null) {
-                                            Toast.makeText(getApplicationContext(), placeName, Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), "장소 이름이 없습니다.", Toast.LENGTH_SHORT).show();
-                                        }
-                                        //검색 결과 지도에 표시
-                                        mMap.clear(); // 기존 마커 지우기
-                                        mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "장소를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
+
+//                            placesClient.fetchPlace(FetchPlaceRequest.builder(placeId, Arrays.asList(Place.Field.LAT_LNG)).build()).addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<FetchPlaceResponse> task) {
+//                                    if(task.isSuccessful()){
+//                                        FetchPlaceResponse fetchPlaceResponse=task.getResult();
+//                                        Place place=fetchPlaceResponse.getPlace();
+//                                        LatLng locationLatLng = place.getLatLng();
+//
+//                                        //검색 결과 지도에 표시
+//                                        mMap.clear(); // 기존 마커 지우기
+//                                        mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
+//                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
+//                                    } else {
+//                                        Toast.makeText(getApplicationContext(), "장소를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+//                                    }
+//                                }
+//                            });
                             break;
                         }
                     }
