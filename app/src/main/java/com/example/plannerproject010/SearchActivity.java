@@ -36,13 +36,12 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SearchActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class SearchActivity extends AppCompatActivity implements OnMapReadyCallback,ItemClickListner {
 
     GoogleMap mMap;
     Button searchBtn;
@@ -61,7 +60,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         RecyclerView recyclerSearchView=findViewById(R.id.searchList);
         recyclerSearchView.setLayoutManager(new LinearLayoutManager(this));
 
-        searchAdapter=new SimpleAdapter(searchList);
+        searchAdapter=new SimpleAdapter(searchList,this);
         recyclerSearchView.setAdapter(searchAdapter);
 
         ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(searchAdapter));
@@ -80,6 +79,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                 searchLocation();
             }
         });
+
+
     }
 
     @Override
@@ -88,8 +89,6 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
 
         LatLng defaultLocation = new LatLng(37.541, 126.986);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation,12));
-
-
     }
 
     private void searchLocation() {
@@ -176,5 +175,10 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
             }
         });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(getApplicationContext(),searchList.get(position).getName(),Toast.LENGTH_SHORT).show();
     }
 }

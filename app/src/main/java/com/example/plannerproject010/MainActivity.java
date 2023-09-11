@@ -21,7 +21,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ItemClickListner {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView=findViewById(R.id.planList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        SimpleAdapter adapter=new SimpleAdapter(list);
+        SimpleAdapter adapter=new SimpleAdapter(list,this);
         recyclerView.setAdapter(adapter);
 
         ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(adapter));
@@ -48,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
     }
 }
 

@@ -1,5 +1,7 @@
 package com.example.plannerproject010;
 
+import android.annotation.SuppressLint;
+import android.content.ClipData;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder> implements ItemTouchHelperListner {
 
     private ArrayList<listClass> data = null;
+    private  ItemClickListner itemClickListner;
 
     @Override
     public boolean onItemMove(int from_position, int to_position) {
@@ -32,6 +35,8 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         notifyItemRemoved(position);
     }
 
+
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameText;
         TextView addressText;
@@ -46,8 +51,10 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         }
     }
 
-    SimpleAdapter(ArrayList<listClass>list){
+    SimpleAdapter(ArrayList<listClass>list, ItemClickListner itemClickListner){
+
         data=list;
+        this.itemClickListner=itemClickListner;
     }
 
     @NonNull
@@ -64,12 +71,23 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder,int position) {
 
         listClass text = data.get(position);
         holder.placeImage.setImageBitmap(text.image);
         holder.nameText.setText(text.getName());
         holder.addressText.setText(text.getAddress());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int position=holder.getAdapterPosition();
+
+                if(itemClickListner!=null){
+                    itemClickListner.onItemClick(position);
+                }
+            }
+        });
     }
 
     @Override
