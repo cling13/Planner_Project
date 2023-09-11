@@ -76,7 +76,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                searchList.clear();
                 searchLocation();
             }
         });
@@ -110,13 +110,12 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         placesClient.findAutocompletePredictions(request).addOnCompleteListener(new OnCompleteListener<FindAutocompletePredictionsResponse>() {
             @Override
             public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
-                List<AutocompletePrediction> predictionList=new ArrayList<>();
 
                 if(task.isSuccessful()){
                     FindAutocompletePredictionsResponse response = task.getResult();
                     if(response!=null){
-                        for(AutocompletePrediction prediction : response.getAutocompletePredictions()){
-                            predictionList.add(prediction);
+                        List<AutocompletePrediction> predictions = response.getAutocompletePredictions();
+                        for(AutocompletePrediction prediction : predictions){
 
                             String placeId = prediction.getPlaceId();
 
@@ -163,24 +162,17 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                                     }).addOnFailureListener((exception)->{
                                             });
 
-                                        }else {
-                                            Toast.makeText(getApplicationContext(),"실패",Toast.LENGTH_SHORT).show();
                                         }
 
                                         //검색 결과 지도에 표시
-                                        mMap.clear(); // 기존 마커 지우기
-                                        mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "장소를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+//                                        mMap.clear(); // 기존 마커 지우기
+//                                        mMap.addMarker(new MarkerOptions().position(locationLatLng).title(placeName));
+//                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15)); // 마커로 카메라 이동
                                     }
                                 }
                             });
-                            break;
                         }
                     }
-                }else {
-                    Toast.makeText(getApplicationContext(), "장소 검색에 실패했습니다.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
