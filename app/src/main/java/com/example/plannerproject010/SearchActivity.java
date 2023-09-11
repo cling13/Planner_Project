@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
@@ -117,42 +119,54 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                             predictionList.add(prediction);
 
                             String placeId = prediction.getPlaceId();
-                            String placeAddress = prediction.getFullText(null).toString();
-                            String placeName =prediction.getPrimaryText(null).toString();
 
-                            listClass tmp=new listClass();
-                            tmp.setAddress(placeAddress);
-                            tmp.setName(placeName);
+                            List<Place.Field> placeFields = Arrays.asList(
+                                    Place.Field.ID,
+                                    Place.Field.NAME,
+                                    Place.Field.ADDRESS,
+                                    Place.Field.LAT_LNG,
+                                    Place.Field.PHOTO_METADATAS // 사진 메타데이터 필드
+                            );
 
-                            searchAdapter.notifyDataSetChanged();
-
-
-                            placesClient.fetchPlace(FetchPlaceRequest.builder(placeId, Arrays.asList(Place.Field.LAT_LNG)).build()).addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
+                            placesClient.fetchPlace(FetchPlaceRequest.builder(placeId, placeFields).build()).addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
                                 @Override
                                 public void onComplete(@NonNull Task<FetchPlaceResponse> task) {
                                     if(task.isSuccessful()){
                                         FetchPlaceResponse fetchPlaceResponse=task.getResult();
                                         Place place=fetchPlaceResponse.getPlace();
+
+
                                         LatLng locationLatLng = place.getLatLng();
+                                        String placeName=place.getName();
+                                        String placeId=place.getAddress();
+
+                                        TextView t1,t2,t3;
+                                        t1=(TextView)findViewById(R.id.textView);
+                                        t2=(TextView)findViewById(R.id.textView2);
+                                        t1.setText(placeName);
+                                        t2.setText(placeId);
                                         List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
 
                                         if (photoMetadataList != null && !photoMetadataList.isEmpty()) {
 
-                                            Toast.makeText(getApplicationContext(),"이미지 시작",Toast.LENGTH_SHORT).show();
                                             // 첫 번째 사진 메타데이터 가져오기
                                             PhotoMetadata photoMetadata = photoMetadataList.get(0);
 
                                             // 사진의 레퍼런스 가져오기
                                             String photoReference = photoMetadata.getAttributions();
 
+                                            FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                                                    .setMaxWidth(500) // Optional.
+                                                    .setMaxHeight(300) // Optional.
+                                                    .build();
+
                                             ImageView imageView=(ImageView) findViewById(R.id.imageView);
-                                            String photoUrl = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + photoReference + "&key=AIzaSyABN87oljSBD55FAbT9AgnYEGcDBFXuVCg";
+                                            placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
+                                                        Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                                                        imageView.setImageBitmap(bitmap);
+                                                    }).addOnFailureListener((exception)->{
+                                            });
 
-                                            Picasso.get().load(photoUrl).into(imageView);
-
-                                            Toast.makeText(getApplicationContext(),"이미지 완료",Toast.LENGTH_SHORT).show();
-                                            // 사진을 다운로드하고 표시 또는 저장하는 작업 수행
-                                            // 이 부분은 이미지 로딩 및 표시 또는 저장에 관련된 코드로 작성해야 합니다.
                                         }else {
                                             Toast.makeText(getApplicationContext(),"실패",Toast.LENGTH_SHORT).show();
                                         }
