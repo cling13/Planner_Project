@@ -138,13 +138,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
 
                                         LatLng locationLatLng = place.getLatLng();
                                         String placeName=place.getName();
-                                        String placeId=place.getAddress();
+                                        String placeAddress=place.getAddress();
 
-                                        TextView t1,t2,t3;
-                                        t1=(TextView)findViewById(R.id.textView);
-                                        t2=(TextView)findViewById(R.id.textView2);
-                                        t1.setText(placeName);
-                                        t2.setText(placeId);
                                         List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
 
                                         if (photoMetadataList != null && !photoMetadataList.isEmpty()) {
@@ -153,17 +148,18 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                             PhotoMetadata photoMetadata = photoMetadataList.get(0);
 
                                             // 사진의 레퍼런스 가져오기
-                                            String photoReference = photoMetadata.getAttributions();
 
                                             FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
                                                     .setMaxWidth(500) // Optional.
-                                                    .setMaxHeight(300) // Optional.
+                                                    .setMaxHeight(500) // Optional.
                                                     .build();
 
-                                            ImageView imageView=(ImageView) findViewById(R.id.imageView);
                                             placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
                                                         Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                                                        imageView.setImageBitmap(bitmap);
+                                                        listClass tmp=new listClass(bitmap,placeName,placeAddress);
+                                                        searchList.add(tmp);
+                                                        searchAdapter.notifyDataSetChanged();
+
                                                     }).addOnFailureListener((exception)->{
                                             });
 

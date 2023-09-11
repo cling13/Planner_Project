@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,12 +35,14 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameText;
         TextView addressText;
+        ImageView placeImage;
 
         ViewHolder(View itemView) {
             super(itemView);
 
             addressText=itemView.findViewById(R.id.placeAddress);
             nameText = itemView.findViewById(R.id.placeName);
+            placeImage=itemView.findViewById(R.id.placeImage);
         }
     }
 
@@ -64,6 +67,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         listClass text = data.get(position);
+        holder.placeImage.setImageBitmap(text.image);
         holder.nameText.setText(text.getName());
         holder.addressText.setText(text.getAddress());
     }

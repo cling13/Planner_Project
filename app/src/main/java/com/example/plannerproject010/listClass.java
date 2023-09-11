@@ -1,16 +1,25 @@
 package com.example.plannerproject010;
 
+import android.graphics.Bitmap;
+
 public class listClass {
-    String Image;
+    Bitmap image;
     String name;
     String address;
 
-    public String getImage() {
-        return Image;
+    listClass(Bitmap image, String name,String address)
+    {
+        this.image=image;
+        this.name=name;
+        this.address=address;
     }
 
-    public void setImage(String image) {
-        Image = image;
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image=image;
     }
 
     public String getName() {
