@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.os.Bundle;
@@ -179,6 +180,11 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public void onItemClick(int position) {
-        Toast.makeText(getApplicationContext(),searchList.get(position).getName(),Toast.LENGTH_SHORT).show();
+        Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+        intent.putExtra("name",searchList.get(position).getName());
+        intent.putExtra("address",searchList.get(position).getAddress());
+        intent.putExtra("image",searchList.get(position).getImage());
+        startActivity(intent);
+        finish();
     }
 }
