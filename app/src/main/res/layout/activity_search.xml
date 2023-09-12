@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/placeSearch"
+            android:id="@+id/placeSearchText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -22,7 +22,7 @@
             android:text="롯데월드" />
 
         <Button
-            android:id="@+id/SearchBtn"
+            android:id="@+id/placeSearchBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Button" />
@@ -30,7 +30,7 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchList"
+        android:id="@+id/placeSearchList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />

@@ -8,22 +8,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -59,7 +53,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
 
         searchList=new ArrayList<>();
 
-        RecyclerView recyclerSearchView=findViewById(R.id.searchList);
+        RecyclerView recyclerSearchView=findViewById(R.id.placeSearchList);
         recyclerSearchView.setLayoutManager(new LinearLayoutManager(this));
 
         searchAdapter=new SimpleAdapter(searchList,this);
@@ -68,8 +62,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         ItemTouchHelper helper=new ItemTouchHelper(new ItemTouchHelperCallback(searchAdapter));
         helper.attachToRecyclerView(recyclerSearchView);
 
-        searchBtn=(Button) findViewById(R.id.SearchBtn);
-        sText=(EditText) findViewById(R.id.placeSearch);
+        searchBtn=(Button) findViewById(R.id.placeSearchBtn);
+        sText=(EditText) findViewById(R.id.placeSearchText);
 
         SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
