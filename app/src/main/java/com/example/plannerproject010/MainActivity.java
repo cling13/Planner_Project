@@ -2,6 +2,7 @@ package com.example.plannerproject010;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,9 +16,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements ItemClickListner {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,ItemClickListner {
+
+    GoogleMap gMap;
 
     ArrayList<listClass> totalPlanList = new ArrayList<>(); //메인액티비티 플랜 저장하는 리스트
     SimpleAdapter totalPlanAdapter; //totalPlanListView 관리해주는 어댑터
@@ -25,6 +36,10 @@ public class MainActivity extends AppCompatActivity implements ItemClickListner 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //맵 연결
+        SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mainMapFragment);
+        mapFragment.getMapAsync(this);
 
         //xml 아이디 연결
         Button goSecActBtn = (Button) findViewById(R.id.button);
@@ -48,9 +63,26 @@ public class MainActivity extends AppCompatActivity implements ItemClickListner 
         });
     }
 
+    //맵 초기설정
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        gMap =googleMap;
+
+        LatLng defaultLocation = new LatLng(37.541, 126.986);
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation,12));
+
+        Marker marker= gMap.addMarker(
+                new MarkerOptions()
+                   //     .icon();
+        );
+    }
 
     @Override
     public void onItemClick(int position) {
+
+    }
+
+    @Override
+    public void onItemBtnClick(int position) {
 
     }
 
@@ -60,16 +92,14 @@ public class MainActivity extends AppCompatActivity implements ItemClickListner 
             result -> {
 
         // getResultCode가 0일 경우 세컨드 액티비티에서 넘어옴
-        if(result.getResultCode() == 0) {
-            String name = result.getData().getStringExtra("name");
-            String address = result.getData().getStringExtra("address");
-            byte[] arr=result.getData().getByteArrayExtra("image");
-            Bitmap bitmap= BitmapFactory.decodeByteArray(arr,0,arr.length);
+        if(result.getResultCode() == 1) {
 
-
-            listClass tmp=new listClass(bitmap,name,address);
+            listClass tmp= (listClass) result.getData().getSerializableExtra("data");
             totalPlanList.add(tmp);
             totalPlanAdapter.notifyDataSetChanged();
+
+            gMap.addMarker(new MarkerOptions().position(tmp.getlatLng()).title(tmp.getName()));
+            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tmp.getlatLng(), 15)); // 마커로 카메라 이동
         }
     });
 

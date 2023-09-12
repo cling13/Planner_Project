@@ -15,6 +15,13 @@
         android:clipToPadding="false"
         android:scrollbars="vertical" />
 
+    <fragment
+        android:id="@+id/mainMapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"

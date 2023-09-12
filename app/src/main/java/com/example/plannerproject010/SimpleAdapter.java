@@ -1,11 +1,10 @@
 package com.example.plannerproject010;
 
-import android.annotation.SuppressLint;
-import android.content.ClipData;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,6 +40,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         TextView nameText;
         TextView addressText;
         ImageView placeImage;
+        Button placeSelectBtn;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -48,6 +48,21 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
             addressText=itemView.findViewById(R.id.placeAddress);
             nameText = itemView.findViewById(R.id.placeName);
             placeImage=itemView.findViewById(R.id.placeImage);
+            placeSelectBtn=itemView.findViewById(R.id.placeSelectBtn);
+
+            placeSelectBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(itemClickListner!=null)
+                    {
+                        int position=getAdapterPosition();
+                        if(position!=RecyclerView.NO_POSITION)
+                        {
+                            itemClickListner.onItemBtnClick(position);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -74,9 +89,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder,int position) {
 
         listClass text = data.get(position);
-        holder.placeImage.setImageBitmap(text.image);
+        holder.placeImage.setImageBitmap(text.getImage());
         holder.nameText.setText(text.getName());
         holder.addressText.setText(text.getAddress());
+
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
