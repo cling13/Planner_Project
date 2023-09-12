@@ -38,6 +38,7 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -183,8 +184,11 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         Intent intent=new Intent(getApplicationContext(),MainActivity.class);
         intent.putExtra("name",searchList.get(position).getName());
         intent.putExtra("address",searchList.get(position).getAddress());
-        intent.putExtra("image",searchList.get(position).getImage());
-        startActivity(intent);
+        ByteArrayOutputStream stream=new ByteArrayOutputStream();
+        searchList.get(position).getImage().compress(Bitmap.CompressFormat.JPEG,100,stream);
+        byte[] byteArray=stream.toByteArray();
+        intent.putExtra("image",byteArray);
+        setResult(0,intent);
         finish();
     }
 }
