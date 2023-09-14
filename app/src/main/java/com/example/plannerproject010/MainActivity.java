@@ -43,12 +43,9 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,ItemClickListner {
 
-    String gptReturnText;
-    GoogleMap gMap;
-    TextView textViewtest;
-
+    MyGoogleMap mainGoogleMap;
+    SimpleAdapter totalPlanAdapter;
     ArrayList<listClass> totalPlanList = new ArrayList<>(); //메인액티비티 플랜 저장하는 리스트
-    SimpleAdapter totalPlanAdapter; //totalPlanListView 관리해주는 어댑터
 
     public static final String MY_SECRET_KEY="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";
     public static final MediaType JSON=MediaType.get("application/json; charset=utf-8");
@@ -57,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-         textViewtest=findViewById(R.id.textViewtest);
 
         //맵 연결
         SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mainMapFragment);
@@ -78,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         goSecActBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 mStartForResult.launch(intent);
             }
@@ -87,27 +82,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //맵 초기설정
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        gMap =googleMap;
-
-        LatLng defaultLocation = new LatLng(37.541, 126.986);
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation,12));
-
-//        Marker marker= gMap.addMarker(
-//                new MarkerOptions()
-//                        .icon();
-//        );
-    }
-
-    @Override
-    public void onItemClick(int position) {
-
+        mainGoogleMap= new MyGoogleMap(googleMap);
+        mainGoogleMap.setgMap();
     }
 
     @Override
     public void onItemBtnClick(int position) {
-        String msg=totalPlanList.get(position).getName();
-        String addmsg=" 주변의 여행지 3곳만 알려줘 추가 설명 없이 이름만 말해줘";
-        msg=msg+addmsg;
+
+        String msg=totalPlanList.get(position).getName()+" 주변의 여행지 3곳만 알려줘 추가 설명 없이 이름만 말해줘";
 
         //gpt에서 추천 여행지 받아오기
         callAPI(msg, new GptCallback() {
@@ -118,21 +100,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     //아래 body().toString()이 아니라 .string() 주의
                     jsonObject = new JSONObject(gptResponse);
                     JSONArray jsonArray = jsonObject.getJSONArray("choices");
-                    gptReturnText = jsonArray.getJSONObject(0).getString("text");
+                    String gptReturnText = jsonArray.getJSONObject(0).getString("text");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            textViewtest.setText(gptReturnText);
-                            int fir=gptReturnText.indexOf("1.");
-                            int sec=gptReturnText.indexOf("2.");
-                            int thi=gptReturnText.indexOf("3.");
-                            String tFir=gptReturnText.substring(fir+3,sec);
-                            String tSec=gptReturnText.substring(sec+3,thi);
-                            String tThi=gptReturnText.substring(thi+3);
-                            tFir=tFir.replace(System.getProperty("line.separator"),"");
-                            tSec=tSec.replace(System.getProperty("line.separator"),"");
-                            tThi=tThi.replace(System.getProperty("line.separator"),"");
+                            int[] idx=new int[3];
+                            idx[0]=gptReturnText.indexOf("1.");
+                            idx[1]=gptReturnText.indexOf("2.");
+                            idx[2]=gptReturnText.indexOf("3.");
+                            String tFir=gptReturnText.substring(idx[0]+3,idx[1]).replace(System.getProperty("line.separator"),"");
+                            String tSec=gptReturnText.substring(idx[1]+3,idx[2]).replace(System.getProperty("line.separator"),"");
+                            String tThi=gptReturnText.substring(idx[2]+3).replace(System.getProperty("line.separator"),"");
 
+
+                            TextView textViewtest=findViewById(R.id.textViewtest);
                             textViewtest.setText(tFir+" "+tSec+" "+tThi);
                         }
                     });
@@ -143,13 +124,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onFailure() {
+                Toast.makeText(getApplicationContext(),"오류발생",Toast.LENGTH_SHORT).show();
             }
         });
-
-
-
+        totalPlanAdapter.notifyDataSetChanged();
     }
-
 
     public void callAPI(String question, GptCallback callback)
     {
@@ -185,32 +164,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, "서버 응답 실패: " + response.code() + " - " + response.message());
-                }
 
                 if(response.isSuccessful()){
-                    int responseCode = response.code();
-                    if (responseCode == 200) {
-                        // 성공 시 콜백 함수 호출
-                        String responseBody = response.body().string();
-                        callback.onResponse(responseBody);
-                    } else {
-                        // 다른 응답 코드에 대한 처리
-                        callback.onFailure();
-                    }
-
-
+                    // 성공 시 콜백 함수 호출
+                    String responseBody = response.body().string();
+                    callback.onResponse(responseBody);
                 }
             }
         });
     }
-
-    public interface GptCallback{
-        void onResponse(String gptResponse);
-        void onFailure();
-    }
-
 
     //세컨드 액티비티에서 플랜 정보 받아와서 리스트에 추가해 주는 부분
     ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(
@@ -219,15 +181,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // getResultCode가 0일 경우 세컨드 액티비티에서 넘어옴
         if(result.getResultCode() == 1) {
-
             listClass tmp= (listClass) result.getData().getSerializableExtra("data");
             totalPlanList.add(tmp);
             totalPlanAdapter.notifyDataSetChanged();
-
-            gMap.addMarker(new MarkerOptions().position(tmp.getlatLng()).title(tmp.getName()));
-            gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tmp.getlatLng(), 15)); // 마커로 카메라 이동
+            mainGoogleMap.addMark(tmp.getlatLng(),tmp.getName());
         }
     });
 
-}
+    @Override
+    public void onItemClick(int position) {
 
+    }
+}

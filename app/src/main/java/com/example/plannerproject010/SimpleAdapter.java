@@ -93,8 +93,6 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         holder.nameText.setText(text.getName());
         holder.addressText.setText(text.getAddress());
 
-
-
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -6,20 +6,18 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -34,25 +32,24 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class SearchActivity extends AppCompatActivity implements OnMapReadyCallback,ItemClickListner {
 
-    GoogleMap gMap;
-    Button placeSearchBtn;
-    EditText placeSearchText;
-
-    ArrayList<listClass> placeSearchList;
+    public static Context context;
     SimpleAdapter placeSearchAdapter;
+    MyGoogleMap secondGoogleMap;
+    ArrayList<listClass> placeSearchList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        Button placeSearchBtn =(Button) findViewById(R.id.placeSearchBtn);
+        EditText placeSearchText =(EditText) findViewById(R.id.placeSearchText);
 
         //초기 리스트와 어댑터 선언및 설정
         placeSearchList =new ArrayList<>();
@@ -64,9 +61,6 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         recyclerSearchView.setAdapter(placeSearchAdapter);
         helper.attachToRecyclerView(recyclerSearchView);
 
-        placeSearchBtn =(Button) findViewById(R.id.placeSearchBtn);
-        placeSearchText =(EditText) findViewById(R.id.placeSearchText);
-
         SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(this);
 
@@ -75,24 +69,19 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onClick(View view) {
                 placeSearchList.clear();
-                searchLocation();
+                searchLocation(5,placeSearchText.getText().toString());
             }
         });
-
-
     }
 
     //map초기 설정
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        gMap =googleMap;
-
-        LatLng defaultLocation = new LatLng(37.541, 126.986);
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation,12));
+        secondGoogleMap=new MyGoogleMap(googleMap);
+        secondGoogleMap.setgMap();
     }
 
-    private void searchLocation() {
-        String locationName = placeSearchText.getText().toString();
+    public void searchLocation(int searchCnt, String locationName) {
 
         //place 검색 요청 생성
         Places.initialize(getApplicationContext(),"AIzaSyABN87oljSBD55FAbT9AgnYEGcDBFXuVCg");
@@ -115,8 +104,9 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                     if(response!=null){
                         //검색정보 전체 리스트에 저장후 하나씩 반복
                         List<AutocompletePrediction> predictions = response.getAutocompletePredictions();
-                        for(AutocompletePrediction prediction : predictions){
+                        for(int i=0; i<searchCnt; i++){
 
+                            AutocompletePrediction prediction = predictions.get(i);
                             String placeId = prediction.getPlaceId();
 
                             //place로 가져올 정보 선언
@@ -161,12 +151,9 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                                         listClass tmp=new listClass(bitmap,placeName,placeAddress,placeLatLng);
                                                         placeSearchList.add(tmp);
                                                         placeSearchAdapter.notifyDataSetChanged();
-
                                                     }).addOnFailureListener((exception)->{
                                             });
                                         }
-
-                                        //검색 결과 지도에 표시
 
                                     }
                                 }
@@ -182,9 +169,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
     @Override
     public void onItemClick(int position) {
         LatLng latLng=placeSearchList.get(position).getlatLng();
-        gMap.clear(); // 기존 마커 지우기
-        gMap.addMarker(new MarkerOptions().position(latLng).title(placeSearchList.get(position).getName()));
-        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15)); // 마커로 카메라 이동
+        secondGoogleMap.markClear();
+        secondGoogleMap.addMark(latLng,placeSearchList.get(position).getName());
     }
 
     @Override
@@ -193,7 +179,6 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         listClass listPosition = placeSearchList.get(position);
 
         listClass tmp=new listClass(listPosition.getImage(),listPosition.getName(),listPosition.getAddress(),listPosition.getlatLng());
-
         intent.putExtra("data",tmp);
 
         setResult(1,intent);
