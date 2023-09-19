@@ -3,12 +3,15 @@ package com.example.plannerproject010;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 
-public class listClass implements Serializable {
+public class listClass implements Serializable{
     byte[] image;
     String name;
     String address;
@@ -57,4 +60,5 @@ public class listClass implements Serializable {
     public void setAddress(String address) {
         this.address = address;
     }
+
 }

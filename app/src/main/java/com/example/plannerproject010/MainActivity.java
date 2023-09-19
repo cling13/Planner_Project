@@ -5,6 +5,7 @@ import static com.android.volley.VolleyLog.TAG;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +47,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     MyGoogleMap mainGoogleMap;
     SimpleAdapter totalPlanAdapter;
+    ItemTouchHelper helper;
     ArrayList<listClass> totalPlanList = new ArrayList<>(); //메인액티비티 플랜 저장하는 리스트
+    SimpleAdapter msgBoxAdapter;
 
     public static final String MY_SECRET_KEY="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";
     public static final MediaType JSON=MediaType.get("application/json; charset=utf-8");
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         totalPlanListView.setLayoutManager(new LinearLayoutManager(this));
         totalPlanAdapter = new SimpleAdapter(totalPlanList, this);
         totalPlanListView.setAdapter(totalPlanAdapter);
-        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelperCallback(totalPlanAdapter));
+        helper = new ItemTouchHelper(new ItemTouchHelperCallback(totalPlanAdapter));
         helper.attachToRecyclerView(totalPlanListView);
 
         //세컨드 액티비티로 전환하는 버튼
@@ -91,6 +95,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         String msg=totalPlanList.get(position).getName()+" 주변의 여행지 3곳만 알려줘 추가 설명 없이 이름만 말해줘";
 
+
+        AlertDialog.Builder dlg=new AlertDialog.Builder(MainActivity.this);
+        View search_msg_box=(View) getLayoutInflater().inflate(R.layout.search_msg_box,null);
+        ArrayList<listClass> msgBoxList=new ArrayList<>();
+        msgBoxAdapter = new SimpleAdapter(msgBoxList, this);
+        RecyclerView msgBoxListView=(RecyclerView) search_msg_box.findViewById(R.id.msgBoxList);
+        msgBoxListView.setLayoutManager(new LinearLayoutManager(this));
+        msgBoxListView.setAdapter(msgBoxAdapter);
+        helper.attachToRecyclerView(msgBoxListView);
+
         //gpt에서 추천 여행지 받아오기
         callAPI(msg, new GptCallback() {
             @Override
@@ -105,16 +119,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void run() {
                             int[] idx=new int[3];
+                            String[] resText=new String[3];
                             idx[0]=gptReturnText.indexOf("1.");
                             idx[1]=gptReturnText.indexOf("2.");
                             idx[2]=gptReturnText.indexOf("3.");
-                            String tFir=gptReturnText.substring(idx[0]+3,idx[1]).replace(System.getProperty("line.separator"),"");
-                            String tSec=gptReturnText.substring(idx[1]+3,idx[2]).replace(System.getProperty("line.separator"),"");
-                            String tThi=gptReturnText.substring(idx[2]+3).replace(System.getProperty("line.separator"),"");
+                            resText[0]=gptReturnText.substring(idx[0]+3,idx[1]).replace(System.getProperty("line.separator"),"");
+                            resText[1]=gptReturnText.substring(idx[1]+3,idx[2]).replace(System.getProperty("line.separator"),"");
+                            resText[2]=gptReturnText.substring(idx[2]+3).replace(System.getProperty("line.separator"),"");
 
-
-                            TextView textViewtest=findViewById(R.id.textViewtest);
-                            textViewtest.setText(tFir+" "+tSec+" "+tThi);
+                            dlg.setView(search_msg_box);
+                            msgBoxList.clear();
+                            for(String msg:resText)
+                                ((SearchActivity)SearchActivity.context).searchLocation(1,msg,msgBoxList,msgBoxAdapter);
+                            dlg.show();
                         }
                     });
                 }catch (JSONException e){
@@ -127,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(getApplicationContext(),"오류발생",Toast.LENGTH_SHORT).show();
             }
         });
-        totalPlanAdapter.notifyDataSetChanged();
     }
 
     public void callAPI(String question, GptCallback callback)
@@ -190,6 +206,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onItemClick(int position) {
-
+        LatLng latLng=totalPlanList.get(position).getlatLng();
     }
 }

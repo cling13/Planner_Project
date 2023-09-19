@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,6 +36,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class SearchActivity extends AppCompatActivity implements OnMapReadyCallback,ItemClickListner {
 
@@ -47,6 +49,8 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        context=this;
 
         Button placeSearchBtn =(Button) findViewById(R.id.placeSearchBtn);
         EditText placeSearchText =(EditText) findViewById(R.id.placeSearchText);
@@ -69,7 +73,9 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onClick(View view) {
                 placeSearchList.clear();
-                searchLocation(5,placeSearchText.getText().toString());
+                searchLocation(5,placeSearchText.getText().toString(),placeSearchList,placeSearchAdapter);
+//               }
+
             }
         });
     }
@@ -81,15 +87,14 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         secondGoogleMap.setgMap();
     }
 
-    public void searchLocation(int searchCnt, String locationName) {
-
+    public void searchLocation(int searchCnt, String locationName,ArrayList<listClass> listClass,SimpleAdapter simpleAdapter) {
         //place 검색 요청 생성
-        Places.initialize(getApplicationContext(),"AIzaSyABN87oljSBD55FAbT9AgnYEGcDBFXuVCg");
+        Places.initialize(getApplicationContext(), "AIzaSyABN87oljSBD55FAbT9AgnYEGcDBFXuVCg");
         PlacesClient placesClient = Places.createClient(this);
-        AutocompleteSessionToken token=AutocompleteSessionToken.newInstance();
+        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
         //place 검색 요청 설정
-        FindAutocompletePredictionsRequest request= FindAutocompletePredictionsRequest.builder()
+        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
                 .setQuery(locationName)
                 .setSessionToken(token)
                 .build();
@@ -99,12 +104,13 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onComplete(@NonNull Task<FindAutocompletePredictionsResponse> task) {
 
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
                     FindAutocompletePredictionsResponse response = task.getResult();
-                    if(response!=null){
+                    if (response != null) {
                         //검색정보 전체 리스트에 저장후 하나씩 반복
                         List<AutocompletePrediction> predictions = response.getAutocompletePredictions();
-                        for(int i=0; i<searchCnt; i++){
+
+                        for (int i = 0; i < searchCnt; i++) {
 
                             AutocompletePrediction prediction = predictions.get(i);
                             String placeId = prediction.getPlaceId();
@@ -122,14 +128,14 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                             placesClient.fetchPlace(FetchPlaceRequest.builder(placeId, placeFields).build()).addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
                                 @Override
                                 public void onComplete(@NonNull Task<FetchPlaceResponse> task) {
-                                    if(task.isSuccessful()){
-                                        FetchPlaceResponse fetchPlaceResponse=task.getResult();
-                                        Place place=fetchPlaceResponse.getPlace();
 
+                                    if (task.isSuccessful()) {
+                                        FetchPlaceResponse fetchPlaceResponse = task.getResult();
+                                        Place place = fetchPlaceResponse.getPlace();
 
                                         LatLng placeLatLng = place.getLatLng();
-                                        String placeName=place.getName();
-                                        String placeAddress=place.getAddress();
+                                        String placeName = place.getName();
+                                        String placeAddress = place.getAddress();
 
                                         //사진 정보 가져오기
                                         List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
@@ -147,14 +153,13 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
 
                                             //리스트에 여행지 정보 추가
                                             placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
-                                                        Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                                                        listClass tmp=new listClass(bitmap,placeName,placeAddress,placeLatLng);
-                                                        placeSearchList.add(tmp);
-                                                        placeSearchAdapter.notifyDataSetChanged();
-                                                    }).addOnFailureListener((exception)->{
+                                                Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                                                listClass tmp = new listClass(bitmap, placeName, placeAddress, placeLatLng);
+                                                listClass.add(tmp);
+                                                simpleAdapter.notifyDataSetChanged();
+                                            }).addOnFailureListener((exception) -> {
                                             });
                                         }
-
                                     }
                                 }
                             });
@@ -164,6 +169,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
             }
         });
     }
+
 
     //리스트에서 아이템 클릭시 해당 정보를 메인 액티비티로 전송해주는 부분
     @Override
