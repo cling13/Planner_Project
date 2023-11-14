@@ -2,6 +2,7 @@ package com.example.plannerproject010;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 
@@ -17,8 +18,9 @@ public class listClass implements Serializable{
     String address;
     double lat;
     double lng;
+    String btnName;
 
-    listClass(Bitmap image, String name,String address,LatLng latLng)
+    listClass(Bitmap image, String name,String address,LatLng latLng,String btnName)
     {
         this.name=name;
         this.address=address;
@@ -27,6 +29,7 @@ public class listClass implements Serializable{
         ByteArrayOutputStream stream=new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG,100,stream);
         this.image=stream.toByteArray();
+        this.btnName=btnName;
     }
 
 
@@ -39,26 +42,18 @@ public class listClass implements Serializable{
         return bitmap;
     }
 
-    public void setImage(Bitmap image) {
-        ByteArrayOutputStream stream=new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG,100,stream);
-        this.image=stream.toByteArray();
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public String getBtnName(){return btnName;}
 
+    public void setBtnName(String btnName)
+    {
+        this.btnName=btnName;
+    }
 }

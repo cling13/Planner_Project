@@ -154,7 +154,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
                                             //리스트에 여행지 정보 추가
                                             placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
                                                 Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                                                listClass tmp = new listClass(bitmap, placeName, placeAddress, placeLatLng);
+                                                listClass tmp = new listClass(bitmap, placeName, placeAddress, placeLatLng,"추가");
                                                 listClass.add(tmp);
                                                 simpleAdapter.notifyDataSetChanged();
                                             }).addOnFailureListener((exception) -> {
@@ -184,7 +184,7 @@ public class SearchActivity extends AppCompatActivity implements OnMapReadyCallb
         Intent intent=new Intent(getApplicationContext(),MainActivity.class);
         listClass listPosition = placeSearchList.get(position);
 
-        listClass tmp=new listClass(listPosition.getImage(),listPosition.getName(),listPosition.getAddress(),listPosition.getlatLng());
+        listClass tmp=new listClass(listPosition.getImage(),listPosition.getName(),listPosition.getAddress(),listPosition.getlatLng(),"주변 검색");
         intent.putExtra("data",tmp);
 
         setResult(1,intent);

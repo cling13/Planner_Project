@@ -92,6 +92,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         holder.placeImage.setImageBitmap(text.getImage());
         holder.nameText.setText(text.getName());
         holder.addressText.setText(text.getAddress());
+        holder.placeSelectBtn.setText(text.getBtnName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
