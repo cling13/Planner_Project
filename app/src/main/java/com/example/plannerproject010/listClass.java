@@ -19,8 +19,9 @@ public class listClass implements Serializable{
     double lat;
     double lng;
     String btnName;
+    String id;
 
-    listClass(Bitmap image, String name,String address,LatLng latLng,String btnName)
+    listClass(Bitmap image, String name,String address,LatLng latLng,String btnName,String id)
     {
         this.name=name;
         this.address=address;
@@ -30,9 +31,14 @@ public class listClass implements Serializable{
         image.compress(Bitmap.CompressFormat.JPEG,100,stream);
         this.image=stream.toByteArray();
         this.btnName=btnName;
+        this.id=id;
     }
 
 
+    public String getId()
+    {
+        return id;
+    }
     public LatLng getlatLng() {
         return new LatLng(lat,lng);
     }

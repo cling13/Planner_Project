@@ -11,11 +11,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +39,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +57,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     SimpleAdapter totalPlanAdapter;
     ArrayList<listClass> totalPlanList = new ArrayList<>(); //메인액티비티 플랜 저장하는 리스트
     ArrayList<listClass> msgBoxList;
+    SQLiteDatabase sqlDB;
+    MyDBHelper myDBHelper;
+
+    public static Context context;
+    DatePicker datePicker;
 
     ItemClickListner itemClickListner= new ItemClickListner() {
         @Override
@@ -58,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         public void onItemBtnClick(int position) {
+            addDB(msgBoxList.get(position));
             addList(msgBoxList.get(position));
         }
     };
@@ -67,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        context=this;
+
+        myDBHelper = new MyDBHelper(this,"plantable",null,1);
         //맵 연결
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mainMapFragment);
         mapFragment.getMapAsync(this);
@@ -81,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelperCallback(totalPlanAdapter));
         totalPlanListView.setAdapter(totalPlanAdapter);
         helper.attachToRecyclerView(totalPlanListView);
+        datePicker = (DatePicker) findViewById(R.id.datePicker);
 
         //세컨드 액티비티로 전환하는 버튼
         goSecActBtn.setOnClickListener(new View.OnClickListener() {
@@ -90,6 +107,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mStartForResult.launch(intent);
             }
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            datePicker.setOnDateChangedListener(new DatePicker.OnDateChangedListener() {
+                @Override
+                public void onDateChanged(DatePicker datePicker, int i, int i1, int i2) {
+                    //읽어오기
+                    String date=Integer.toString(i)+"-"+Integer.toString(i1)+"-"+Integer.toString(i2);
+                    totalPlanList.clear();
+                    sqlDB=myDBHelper.getReadableDatabase();
+                    String sql="select * from plantable WHERE date = '"+date+"';";
+                    Log.d("sql2",sql);
+                    Cursor cursor = sqlDB.rawQuery(sql,null);
+                    while(cursor.moveToNext()){
+                        totalPlanAdapter.addItemList(cursor.getString(1),MainActivity.this);
+                    }
+                    totalPlanAdapter.notifyDataSetChanged();
+                    sqlDB.close();
+                }
+            });
+        }
+
+        Button btn=(Button) findViewById(R.id.button2);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sqlDB=myDBHelper.getWritableDatabase();
+                myDBHelper.onUpgrade(sqlDB,1,1);
+                sqlDB.close();
+            }
+        });
+
     }
 
     //맵 초기설정
@@ -170,22 +218,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // getResultCode가 0일 경우 세컨드 액티비티에서 넘어옴
                 if (result.getResultCode() == 1) {
                     listClass tmp = (listClass) result.getData().getSerializableExtra("data");
+                    addDB(tmp);
                     addList(tmp);
                 }
             });
 
     @Override
     public void onItemClick(int position) {
+        addDB(msgBoxList.get(position));
         addList(msgBoxList.get(position));
     }
 
     void addList(listClass tmp)
     {
+
         tmp.setBtnName("주변 검색");
         totalPlanList.add(tmp);
         totalPlanAdapter.notifyDataSetChanged();
         mainGoogleMap.addMark(tmp.getlatLng(), tmp.getName());
     }
-
+    void addDB(listClass tmp)
+    {
+        sqlDB=myDBHelper.getReadableDatabase();
+        String date = Integer.toString(datePicker.getYear())+"-"+Integer.toString(datePicker.getMonth())+"-"+Integer.toString(datePicker.getDayOfMonth());
+        String sql="INSERT INTO plantable VALUES ('"+date+"', '"+tmp.getId()+"');";
+        Log.d("sql",sql);
+        sqlDB.execSQL(sql);
+    }
 }
 

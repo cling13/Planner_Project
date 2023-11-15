@@ -18,9 +18,6 @@ public class MyGoogleMap {
         LatLng defaultLocation = new LatLng(37.541, 126.986);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation,12));
 
-//        Marker marker= gMap.addMarker(
-//                new MarkerOptions()
-//                        .icon();
     }
 
     void addMark(LatLng latLng, String title)
