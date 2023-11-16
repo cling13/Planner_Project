@@ -16,11 +16,13 @@ public class MyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE plantable (date CHAR(10) , id CHAR(50));");
+        db.execSQL("CREATE TABLE movetable (date CHAR(10) , lat DOUBLE, lng DOUBLE);");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
             db.execSQL("DROP TABLE IF EXISTS plantable;");
+            db.execSQL("DROP TABLE IF EXISTS movetable;");
         onCreate(db);
     }
 }
